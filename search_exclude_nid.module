@@ -1,0 +1,62 @@
+<?php
+
+/**
+ * @file
+ * Excludes single node pages from search results
+ */
+function search_exclude_nid_menu() {
+  $items = array();
+  $items['admin/config/search/search_exclusion'] = array(
+    'title' => 'Exclude nodes from search by node id',
+    'description' => 'Excludes nodes from the site search based on their node ID. Handy if you have duplicated content somewhere on listing pages for instance.',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('search_exclude_nid_search_exclusion_form'),
+    'access callback' => 'user_access',
+    'access arguments' => array('administer search exclude nids'),
+  );
+  return $items;
+}
+
+/**
+ * defines the administration form
+ */
+function search_exclude_nid_search_exclusion_form() {
+  $form = array();
+  $form['search_exclude_nid_search_exclusion_nids'] = array(
+    '#type' => 'textfield',
+    '#default_value' => variable_get('search_exclude_nid_search_exclusion_nids', ''),
+    '#description' => 'Please enter the node ids divded by a "," (for example: 1,23,45)',
+  );
+
+  return system_settings_form($form);
+}
+
+/**
+ * Implements hook_query_alter().
+ */
+function search_exclude_nid_query_alter(QueryAlterableInterface $query) {
+
+  if ($query->hasTag('node_access') && $query->hasTag('pager')) {
+
+    // filter the excluded nids to make sure we dont break the query
+    $excluded_nids = variable_get('search_exclude_nid_search_exclusion_nids', '');
+    $excluded_nids = explode(',', $excluded_nids);
+    $temp = array();
+    if (count($excluded_nids)) {
+
+      foreach ($excluded_nids as $excluded_nid) {
+        $temp[] = intval($excluded_nid);
+      }
+      $excluded_nids = $temp;
+      if (!empty($excluded_nids)) {
+        $tables = $query->getTables();
+        foreach ($tables as $table) {
+          if ($table['table'] == 'search_index') {
+            // remove the node IDs from the query
+            $query->condition('n.nid', $excluded_nids, 'NOT IN');
+          }
+        }
+      }
+    }
+  }
+}
