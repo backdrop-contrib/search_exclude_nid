@@ -6,8 +6,8 @@
  */
 
 /**
-* Implements hook_uninstall().
-*/
+ * Implements hook_uninstall().
+ */
 function search_exclude_nid_uninstall() {
   db_query("DELETE FROM {variable} WHERE name LIKE 'search_exclude_nid_%'");
 }
