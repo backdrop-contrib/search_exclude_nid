@@ -117,10 +117,11 @@ function search_exclude_nid_search_exclusion_form() {
       'items' => $items,
       'title' => 'List of excluded nodes',
       'type' => 'ul',
-      'attributes' => array(),
-      ),
+      'attributes' => array()
+      )
     ),
   );
+
 
   return system_settings_form($form);
 }
@@ -141,7 +142,7 @@ function search_exclude_nid_query_alter(QueryAlterableInterface $query) {
           foreach ($excluded_nids as $excluded_nid) {
             $temp[] = intval($excluded_nid);
           }
-          $excluded_nids = $temp;    
+          $excluded_nids = $temp;
           if (!empty($excluded_nids)) {
             // Remove the node IDs from the query.
             $query->condition('n.nid', $excluded_nids, 'NOT IN');
