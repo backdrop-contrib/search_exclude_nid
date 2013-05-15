@@ -19,12 +19,12 @@ function search_exclude_nid_menu() {
     'access callback' => 'user_access',
     'access arguments' => array('administer search exclude nids'),
   );
-  // path with autocomplete function for nodes
+  // Path with autocomplete function for nodes.
   $items['search_exclusion/autocomplete'] = array(
     'title' => 'Autocomplete for nodes',
     'page callback' => 'search_exclude_nid_nodes_autocomplete',
     'access arguments' => array('administer search exclude nids'),
-    'type' => MENU_CALLBACK
+    'type' => MENU_CALLBACK,
   );
   return $items;
 }
@@ -47,9 +47,8 @@ function search_exclude_nid_search_exclusion_form() {
     '#autocomplete_path' => 'search_exclusion/autocomplete',
     '#description' => 'Lookup a node title and add the node id to your exclusion list by clicking the link below.',
   );
-  $form['add_node_id_link'] = array(
-    '#type' => 'markup',
-    '#markup' => "<a href='#' id='add-node-id-link'>+ ADD NID</a>
+
+  $nid_add_link = "<a href='#' id='add-node-id-link'>+ ADD NID</a>
                   <script type='text/javascript'>
                     jQuery(document).ready(function() {
                       // Handler for .ready() called.
@@ -90,19 +89,28 @@ function search_exclude_nid_search_exclusion_form() {
                       }
                       return filtered_nids_list;
                     }
-                  </script>");
-  
+                  </script>";
+
+  $form['add_node_id_link'] = array(
+    '#type' => 'markup',
+    '#markup' => $nid_add_link,
+  );
+
   $result = db_select('node', 'n')
     ->fields('n', array('nid', 'title'))
     ->condition('nid', explode(',', variable_get('search_exclude_nid_search_exclusion_nids')), 'IN')
     ->execute();
-  
-  // excluded nodes
+
+  // List of excluded nodes.
   $items = array();
   foreach ($result as $row) {
-    $items[] = array('data' => l($row->title . ' (nid:' . $row->nid . ')', 'node/' . $row->nid), 'id' => 'node-' . $row->nid);
+    $items[] = array(
+      'data' => l($row->title . ' (nid:' . $row->nid . ')',
+      'node/' . $row->nid),
+      'id' => 'node-' . $row->nid,
+     );
   } 
-  
+
   $form['exclusion_list'] = array(    
     '#type' => 'markup',
     '#markup' => theme_item_list(array('items' => $items, 'title' => 'List of excluded nodes', 'type' => 'ul', 'attributes' => array())),
