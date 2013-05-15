@@ -117,11 +117,10 @@ function search_exclude_nid_search_exclusion_form() {
       'items' => $items,
       'title' => 'List of excluded nodes',
       'type' => 'ul',
-      'attributes' => array()
+      'attributes' => array(),
       )
     ),
   );
-
 
   return system_settings_form($form);
 }
