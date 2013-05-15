@@ -6,8 +6,7 @@
  */
 
 /**
- * Implements hook_menu and defines some paths like the link to the admin UI,
- * as well as the autocomplete function of the node title lookup
+ * Implements hook_menu().
  */
 function search_exclude_nid_menu() {
   $items = array();
@@ -23,7 +22,7 @@ function search_exclude_nid_menu() {
   // path with autocomplete function for nodes
   $items['search_exclusion/autocomplete'] = array(
     'title' => 'Autocomplete for nodes',
-    'page callback' => '_nodes_autocomplete',
+    'page callback' => 'search_exclude_nid_nodes_autocomplete',
     'access arguments' => array('administer search exclude nids'),
     'type' => MENU_CALLBACK
   );
@@ -31,7 +30,7 @@ function search_exclude_nid_menu() {
 }
 
 /**
- * implements hook_form, defines the administration form
+ * Implements hook_form().
  */
 function search_exclude_nid_search_exclusion_form() {
   $form = array();
@@ -141,9 +140,9 @@ function search_exclude_nid_query_alter(QueryAlterableInterface $query) {
 
 /**
 * autocomplete helper
-* $string = string for search
+* $string = string to search for
 */
-function _nodes_autocomplete($string) {
+function search_exclude_nid_nodes_autocomplete($string) {
   $matches = array();
   $result = db_select('node', 'n')
     ->fields('n', array('nid', 'title'))
