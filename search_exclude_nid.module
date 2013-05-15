@@ -108,12 +108,18 @@ function search_exclude_nid_search_exclusion_form() {
       'data' => l($row->title . ' (nid:' . $row->nid . ')',
       'node/' . $row->nid),
       'id' => 'node-' . $row->nid,
-     );
-  } 
+    );
+  }
 
-  $form['exclusion_list'] = array(    
+  $form['exclusion_list'] = array(
     '#type' => 'markup',
-    '#markup' => theme_item_list(array('items' => $items, 'title' => 'List of excluded nodes', 'type' => 'ul', 'attributes' => array())),
+    '#markup' => theme_item_list(array(
+      'items' => $items,
+      'title' => 'List of excluded nodes',
+      'type' => 'ul',
+      'attributes' => array(),
+      ),
+    ),
   );
 
   return system_settings_form($form);
@@ -127,7 +133,7 @@ function search_exclude_nid_query_alter(QueryAlterableInterface $query) {
     $tables = $query->getTables();
     foreach ($tables as $table) {
       if ($table['table'] == 'search_index') {
-        // filter the excluded nids to make sure we dont break the query
+        // Filter the excluded nids to make sure we dont break the query.
         $excluded_nids = variable_get('search_exclude_nid_search_exclusion_nids', '');
         $excluded_nids = explode(',', $excluded_nids);
         $temp = array();
@@ -137,7 +143,7 @@ function search_exclude_nid_query_alter(QueryAlterableInterface $query) {
           }
           $excluded_nids = $temp;    
           if (!empty($excluded_nids)) {
-            // remove the node IDs from the query
+            // Remove the node IDs from the query.
             $query->condition('n.nid', $excluded_nids, 'NOT IN');
           }
         }
@@ -147,9 +153,8 @@ function search_exclude_nid_query_alter(QueryAlterableInterface $query) {
 }
 
 /**
-* autocomplete helper
-* $string = string to search for
-*/
+ * Autocomplete helper, $string = string to search for.
+ */
 function search_exclude_nid_nodes_autocomplete($string) {
   $matches = array();
   $result = db_select('node', 'n')
@@ -157,11 +162,11 @@ function search_exclude_nid_nodes_autocomplete($string) {
     ->condition('title', '%' . db_like($string) . '%', 'LIKE')
     ->execute();
 
-  // save the query to matches
+  // Save the query to matches.
   foreach ($result as $row) {
     $matches[$row->nid] = check_plain($row->title);
   }
 
-  // Return the result to the form in json
+  // Return the result to the form in json.
   drupal_json_output($matches);
 }
