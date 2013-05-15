@@ -6,6 +6,7 @@
  */
 function search_exclude_nid_menu() {
   $items = array();
+  
   $items['admin/config/search/search_exclusion'] = array(
     'title' => 'Exclude nodes from search by node id',
     'description' => 'Excludes nodes from the site search based on their node ID. Handy if you have duplicated content somewhere on listing pages for instance.',
@@ -13,6 +14,13 @@ function search_exclude_nid_menu() {
     'page arguments' => array('search_exclude_nid_search_exclusion_form'),
     'access callback' => 'user_access',
     'access arguments' => array('administer search exclude nids'),
+  );  
+  // path with autocomplete function for nodes
+  $items['search_exclusion/autocomplete'] = array(
+    'title' => 'Autocomplete for nodes',
+    'page callback' => '_nodes_autocomplete',
+    'access arguments' => array('administer search exclude nids'),
+    'type' => MENU_CALLBACK
   );
   return $items;
 }
@@ -22,10 +30,80 @@ function search_exclude_nid_menu() {
  */
 function search_exclude_nid_search_exclusion_form() {
   $form = array();
+    
   $form['search_exclude_nid_search_exclusion_nids'] = array(
+    '#title' => t('nids to be excluded from search result'),
     '#type' => 'textfield',
     '#default_value' => variable_get('search_exclude_nid_search_exclusion_nids', ''),
-    '#description' => 'Please enter the node ids divded by a "," (for example: 1,23,45)',
+    '#description' => 'Please enter the node ids separated by a "," (for example: 1,23,45)',
+  );
+  $form['search_exclude_nid_search_exclusion_auto'] = array(
+    '#title' => t('Node title lookup'),
+    '#type' => 'textfield',
+    '#autocomplete_path' => 'search_exclusion/autocomplete',
+    '#description' => 'Lookup a node title and add the node id to your exclusion list by clicking the link below.',
+  );
+  $form['add_node_id_link'] = array(
+    '#type' => 'markup',
+    '#markup' => "<a href='#' id='add-node-id-link'>+ ADD NID</a>
+                  <script type='text/javascript'>
+                    jQuery(document).ready(function() {
+                      // Handler for .ready() called.
+                      var filtered_nids_list = Array();
+                      jQuery('#add-node-id-link').click(function(){
+                        var nid = parseInt(jQuery('#edit-search-exclude-nid-search-exclusion-auto').val());                                                                                              
+                        if (!(isNaN(nid)) && (nid != 0)) {
+                          filtered_nids_list = getFilteredNidList();                          
+                          if(filtered_nids_list.containsNot(nid)){
+                            filtered_nids_list.push(nid);
+                          }                          
+                          jQuery('#edit-search-exclude-nid-search-exclusion-nids').val(filtered_nids_list.join(','));
+                          jQuery('#edit-search-exclude-nid-search-exclusion-auto').val('').focus();                                                                                         
+                        }        
+                      });
+                      jQuery('#edit-submit').click(function(){
+                        filtered_nids_list = getFilteredNidList();
+                        jQuery('#edit-search-exclude-nid-search-exclusion-nids').val(filtered_nids_list.join(','));       
+                      });
+                    });                    
+                    Array.prototype.containsNot = function(obj) {
+                        var i = this.length;
+                        while (i--) {
+                            if (this[i] == obj) {
+                                return false;
+                            }
+                        }
+                        return true;
+                    }                    
+                    function getFilteredNidList() {
+                      var nidsList = jQuery('#edit-search-exclude-nid-search-exclusion-nids').val().split(',');
+                      var filtered_nids_list = new Array();  
+                      var intRegex = /^\d+$/;  
+                      for (var i in nidsList) {
+                        if (intRegex.test(nidsList[i]) && (nidsList[i] > 0) && (filtered_nids_list.containsNot(nidsList[i]))) {
+                          filtered_nids_list.push(nidsList[i]);
+                        }
+                      }
+                      return filtered_nids_list;
+                    }                    
+                  </script>
+                  ",
+  );
+  
+  $result = db_select('node', 'n')
+    ->fields('n', array('nid', 'title'))
+    ->condition('nid', explode(',', variable_get('search_exclude_nid_search_exclusion_nids')), 'IN')
+    ->execute();
+  
+  // excluded nodes
+  $items = array();
+  foreach ($result as $row) {
+    $items[] = array('data' => l($row->title . ' (nid:' . $row->nid . ')', 'node/' . $row->nid), 'id' => 'node-' . $row->nid);
+  } 
+  
+  $form['exclusion_list'] = array(    
+    '#type' => 'markup',
+    '#markup' => theme_item_list(array('items' => $items, 'title' => 'List of excluded nodes', 'type' => 'ul', 'attributes' => array())),
   );
 
   return system_settings_form($form);
@@ -34,29 +112,47 @@ function search_exclude_nid_search_exclusion_form() {
 /**
  * Implements hook_query_alter().
  */
-function search_exclude_nid_query_alter(QueryAlterableInterface $query) {
-
+function search_exclude_nid_query_alter(QueryAlterableInterface $query) {      
   if ($query->hasTag('node_access') && $query->hasTag('pager')) {
-
-    // filter the excluded nids to make sure we dont break the query
-    $excluded_nids = variable_get('search_exclude_nid_search_exclusion_nids', '');
-    $excluded_nids = explode(',', $excluded_nids);
-    $temp = array();
-    if (count($excluded_nids)) {
-
-      foreach ($excluded_nids as $excluded_nid) {
-        $temp[] = intval($excluded_nid);
-      }
-      $excluded_nids = $temp;
-      if (!empty($excluded_nids)) {
-        $tables = $query->getTables();
+    $tables = $query->getTables();
         foreach ($tables as $table) {
-          if ($table['table'] == 'search_index') {
-            // remove the node IDs from the query
-            $query->condition('n.nid', $excluded_nids, 'NOT IN');
-          }
+          if ($table['table'] == 'search_index') {            
+            // filter the excluded nids to make sure we dont break the query
+            $excluded_nids = variable_get('search_exclude_nid_search_exclusion_nids', '');
+            $excluded_nids = explode(',', $excluded_nids);
+            $temp = array();
+            if (count($excluded_nids)) {
+              foreach ($excluded_nids as $excluded_nid) {
+                $temp[] = intval($excluded_nid);
+              }
+              $excluded_nids = $temp;    
+            
+              if (!empty($excluded_nids)) {
+                // remove the node IDs from the query
+                $query->condition('n.nid', $excluded_nids, 'NOT IN');
+              }
+           }      
         }
-      }
-    }
+     }
   }
+}
+
+/**
+* autocomplete helper
+* $string = string for search
+*/
+function _nodes_autocomplete($string) {
+  $matches = array();
+  $result = db_select('node', 'n')
+    ->fields('n', array('nid', 'title'))
+    ->condition('title', '%' . db_like($string) . '%', 'LIKE')
+    ->execute();
+
+  // save the query to matches
+  foreach ($result as $row) {
+    $matches[$row->nid] = check_plain($row->title);
+  }
+
+  // Return the result to the form in json
+  drupal_json_output($matches);
 }
