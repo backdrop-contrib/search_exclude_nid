@@ -30,6 +30,18 @@ function search_exclude_nid_menu() {
 }
 
 /**
+ * Implements hook_permission().
+ */
+function search_exclude_nid_permission() {
+  return array(
+    'administer search exclude nids' => array(
+      'title' => t('Administer search exclude nid'),
+      'description' => t('Access the configuration page for the module.'),
+    ),
+  );
+}
+
+/**
  * Implements hook_form().
  */
 function search_exclude_nid_search_exclusion_form() {
@@ -48,7 +60,7 @@ function search_exclude_nid_search_exclusion_form() {
     '#description' => 'Lookup a node title and add the node id to your exclusion list by clicking the link below.',
   );
 
-  $nid_add_link = "<a href='#' id='add-node-id-link'>+ ADD NID</a>
+  $nid_add_link = "<a href='#' id='add-node-id-link'>+ ADD NID TO EXCLUSION LIST</a>
                   <script type='text/javascript'>
                     jQuery(document).ready(function() {
                       // Handler for .ready() called.
@@ -123,6 +135,27 @@ function search_exclude_nid_search_exclusion_form() {
   );
 
   return system_settings_form($form);
+}
+
+/*
+ * Implements hook_form_validate().
+ */
+function search_exclude_nid_search_exclusion_form_validate($form, &$form_state) {
+  if (isset($form_state['values']['search_exclude_nid_search_exclusion_nids'])) {
+    $filtered_nid_list = array();
+    $nid_list = $form_state['values']['search_exclude_nid_search_exclusion_nids'];
+    if ($nid_list) {
+      $nid_list = explode(',', $nid_list);
+      foreach($nid_list as $nid) {
+        // only add valid nodes
+        $node = node_load(intval(trim($nid)));
+        if (isset($node->type)) {
+          $filtered_nid_list[] = intval($nid);
+        }
+      }
+      $form_state['values']['search_exclude_nid_search_exclusion_nids'] = implode(',', $filtered_nid_list);
+    }
+  }
 }
 
 /**
