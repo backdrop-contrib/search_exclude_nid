@@ -10,7 +10,7 @@
  */
 function search_exclude_nid_search_exclusion_form() {
   $form = array();
-  
+
   $form['search_exclude_nid_search_exclusion_nids'] = array(
     '#title' => t('Node ids to be excluded from search result'),
     '#type' => 'textfield',
@@ -71,14 +71,14 @@ function search_exclude_nid_search_exclusion_form() {
     '#type' => 'markup',
     '#markup' => $nid_add_link,
   );
-  
+
   if (count(variable_get('search_exclude_nid_search_exclusion_nids', array()))) {
     $items = array();
     $result = db_select('node', 'n')
       ->fields('n', array('nid', 'title'))
       ->condition('nid', variable_get('search_exclude_nid_search_exclusion_nids', array()), 'IN')
       ->execute();
-  
+
     // List of excluded nodes.
     $items = array();
     foreach ($result as $row) {
@@ -88,7 +88,7 @@ function search_exclude_nid_search_exclusion_form() {
         'id' => 'node-' . $row->nid,
       );
     }
-  
+
     $form['exclusion_list'] = array(
       '#type' => 'markup',
       '#markup' => theme_item_list(array(
@@ -103,7 +103,7 @@ function search_exclude_nid_search_exclusion_form() {
   return system_settings_form($form);
 }
 
-/*
+/**
  * Implements hook_form_validate().
  */
 function search_exclude_nid_search_exclusion_form_validate($form, &$form_state) {
@@ -112,8 +112,8 @@ function search_exclude_nid_search_exclusion_form_validate($form, &$form_state) 
     $nid_list = $form_state['values']['search_exclude_nid_search_exclusion_nids'];
     if ($nid_list) {
       $nid_list = explode(',', $nid_list);
-      foreach($nid_list as $nid) {
-        // only add valid nodes
+      foreach ($nid_list as $nid) {
+        // Add only add valid nodes.
         $node = node_load(intval(trim($nid)));
         if (isset($node->type)) {
           $filtered_nid_list[] = intval($nid);
