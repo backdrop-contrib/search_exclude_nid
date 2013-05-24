@@ -5,4 +5,4 @@ package = Search
 
 dependencies[] = search
 
-configure = admin/search_exclude_nid/settings
+configure = admin/config/search/search_exclusion
