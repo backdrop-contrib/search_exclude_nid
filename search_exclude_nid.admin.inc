@@ -15,61 +15,17 @@ function search_exclude_nid_search_exclusion_form() {
     '#title' => t('Node ids to be excluded from search result'),
     '#type' => 'textfield',
     '#default_value' => implode(',', variable_get('search_exclude_nid_search_exclusion_nids', array())),
-    '#description' => 'Please enter the node ids separated by a "," (for example: 1,23,45)',
+    '#description' => t('Please enter the node ids separated by a "," (for example: 1,23,45)'),
   );
   $form['search_exclude_nid_search_exclusion_auto'] = array(
     '#title' => t('Node title lookup'),
     '#type' => 'textfield',
     '#autocomplete_path' => 'search_exclusion/autocomplete',
-    '#description' => 'Lookup a node title and add the node id to your exclusion list by clicking the link below.',
+    '#description' => t('Lookup a node title and copy & paste the node ID into the list field above or press just "Save configuration". The node ID will then be automatically added to the list.'),
   );
-
-  $nid_add_link = "<a href='#' id='add-node-id-link'>+ ADD NID TO EXCLUSION LIST</a>
-                  <script type='text/javascript'>
-                    jQuery(document).ready(function() {
-                      // Handler for .ready() called.
-                      var filtered_nids_list = Array();
-                      jQuery('#add-node-id-link').click(function(){
-                        var nid = parseInt(jQuery('#edit-search-exclude-nid-search-exclusion-auto').val());
-                        if (!(isNaN(nid)) && (nid != 0)) {
-                          filtered_nids_list = getFilteredNidList();
-                          if(filtered_nids_list.containsNot(nid)){
-                            filtered_nids_list.push(nid);
-                          }
-                          jQuery('#edit-search-exclude-nid-search-exclusion-nids').val(filtered_nids_list.join(','));
-                          jQuery('#edit-search-exclude-nid-search-exclusion-auto').val('').focus();
-                        }        
-                      });
-                      jQuery('#edit-submit').click(function(){
-                        filtered_nids_list = getFilteredNidList();
-                        jQuery('#edit-search-exclude-nid-search-exclusion-nids').val(filtered_nids_list.join(','));
-                      });
-                    });
-                    Array.prototype.containsNot = function(obj) {
-                        var i = this.length;
-                        while (i--) {
-                            if (this[i] == obj) {
-                                return false;
-                            }
-                        }
-                        return true;
-                    }
-                    function getFilteredNidList() {
-                      var nidsList = jQuery('#edit-search-exclude-nid-search-exclusion-nids').val().split(',');
-                      var filtered_nids_list = new Array();  
-                      var intRegex = /^\d+$/;  
-                      for (var i in nidsList) {
-                        if (intRegex.test(nidsList[i]) && (nidsList[i] > 0) && (filtered_nids_list.containsNot(nidsList[i]))) {
-                          filtered_nids_list.push(nidsList[i]);
-                        }
-                      }
-                      return filtered_nids_list;
-                    }
-                  </script>";
-
-  $form['add_node_id_link'] = array(
-    '#type' => 'markup',
-    '#markup' => $nid_add_link,
+  
+  $form['#attached']['js'] = array(
+    drupal_get_path('module', 'search_exclude_nid') . '/search_exclude_nid.js',
   );
 
   if (count(variable_get('search_exclude_nid_search_exclusion_nids', array()))) {
@@ -100,13 +56,15 @@ function search_exclude_nid_search_exclusion_form() {
       ),
     );
   }
+  $form['#submit'][] = 'search_exclude_nid_search_exclusion_form_submit';
   return system_settings_form($form);
 }
 
 /**
  * Implements hook_form_validate().
  */
-function search_exclude_nid_search_exclusion_form_validate($form, &$form_state) {
+function search_exclude_nid_search_exclusion_form_submit($form, &$form_state) {
+  
   if (isset($form_state['values']['search_exclude_nid_search_exclusion_nids'])) {
     $filtered_nid_list = array();
     $nid_list = $form_state['values']['search_exclude_nid_search_exclusion_nids'];
