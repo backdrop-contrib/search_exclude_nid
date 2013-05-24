@@ -23,7 +23,7 @@ function search_exclude_nid_search_exclusion_form() {
     '#autocomplete_path' => 'search_exclusion/autocomplete',
     '#description' => t('Lookup a node title and copy & paste the node ID into the list field above or press just "Save configuration". The node ID will then be automatically added to the list.'),
   );
-  
+
   $form['#attached']['js'] = array(
     drupal_get_path('module', 'search_exclude_nid') . '/search_exclude_nid.js',
   );
@@ -64,7 +64,6 @@ function search_exclude_nid_search_exclusion_form() {
  * Implements hook_form_validate().
  */
 function search_exclude_nid_search_exclusion_form_submit($form, &$form_state) {
-  
   if (isset($form_state['values']['search_exclude_nid_search_exclusion_nids'])) {
     $filtered_nid_list = array();
     $nid_list = $form_state['values']['search_exclude_nid_search_exclusion_nids'];

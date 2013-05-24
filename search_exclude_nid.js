@@ -15,7 +15,7 @@
         }
         filtered_nids_list = getFilteredNidList();
         jQuery('#edit-search-exclude-nid-search-exclusion-nids').val(filtered_nids_list.join(','));
-      });      
+      });
     }
   };
 })(jQuery);
