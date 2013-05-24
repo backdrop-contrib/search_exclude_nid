@@ -13,8 +13,8 @@ function search_exclude_nid_menu() {
 
   $items['admin/config/search/search_exclusion'] = array(
     'file' => 'search_exclude_nid.admin.inc',
-    'title' => 'Hide nodes from search',
-    'description' => 'Excludes nodes from the site search based on their node ID. Handy if you have duplicated content somewhere on listing pages for instance.',
+    'title' => t('Hide nodes from search'),
+    'description' => t('Excludes nodes from the site search based on their node ID. Handy if you have duplicated content somewhere on listing pages for instance.'),
     'page callback' => 'drupal_get_form',
     'page arguments' => array('search_exclude_nid_search_exclusion_form'),
     'access callback' => 'user_access',
@@ -23,7 +23,7 @@ function search_exclude_nid_menu() {
   // Path with autocomplete function for nodes.
   $items['search_exclusion/autocomplete'] = array(
     'file' => 'search_exclude_nid.admin.inc',
-    'title' => 'Autocomplete for nodes',
+    'title' => t('Autocomplete for nodes'),
     'page callback' => 'search_exclude_nid_nodes_autocomplete',
     'access arguments' => array('administer search exclude nids'),
     'type' => MENU_CALLBACK,
