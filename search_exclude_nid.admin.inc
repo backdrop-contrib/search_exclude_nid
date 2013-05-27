@@ -6,7 +6,11 @@
  */
 
 /**
- * Implements hook_form().
+ * Form constructor for the module's settings form.
+ *
+ * @see search_exclude_nid_search_exclusion_form_submit()
+ *
+ * @ingroup forms
  */
 function search_exclude_nid_search_exclusion_form() {
   $form = array();
@@ -47,7 +51,7 @@ function search_exclude_nid_search_exclusion_form() {
 
     $form['exclusion_list'] = array(
       '#type' => 'markup',
-      '#markup' => theme_item_list(array(
+      '#markup' => theme('item_list' , array(
         'items' => $items,
         'title' => 'List of excluded nodes',
         'type' => 'ul',
@@ -61,7 +65,7 @@ function search_exclude_nid_search_exclusion_form() {
 }
 
 /**
- * Implements hook_form_validate().
+ * Form submission handler for search_exclude_nid_search_exclusion_form().
  */
 function search_exclude_nid_search_exclusion_form_submit($form, &$form_state) {
   if (isset($form_state['values']['search_exclude_nid_search_exclusion_nids'])) {
