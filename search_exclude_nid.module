@@ -38,7 +38,8 @@ function search_exclude_nid_permission() {
   return array(
     'administer search exclude nids' => array(
       'title' => t('Administer search exclude nid'),
-      'description' => t('Access to the configuration page of the module.'),
+      'description' => t('Access to the configuration page of the module and the autocomplete function to lookup the node id to a node title.'),
+      'restrict access' => TRUE,
     ),
   );
 }
