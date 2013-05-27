@@ -51,7 +51,7 @@ function search_exclude_nid_search_exclusion_form() {
 
     $form['exclusion_list'] = array(
       '#type' => 'markup',
-      '#markup' => theme('item_list' , array(
+      '#markup' => theme('item_list', array(
         'items' => $items,
         'title' => 'List of excluded nodes',
         'type' => 'ul',
