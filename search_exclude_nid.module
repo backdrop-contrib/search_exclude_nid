@@ -55,8 +55,8 @@ function search_exclude_nid_query_alter(QueryAlterableInterface $query) {
         // Filter the excluded nids to make sure we dont break the query.
         $excluded_nids = variable_get('search_exclude_nid_search_exclusion_nids', array());
         if (count($excluded_nids)) {
-            // Remove the node IDs from the query.
-            $query->condition('n.nid', $excluded_nids, 'NOT IN');
+          // Remove the node IDs from the query.
+          $query->condition('n.nid', $excluded_nids, 'NOT IN');
         }
       }
     }
