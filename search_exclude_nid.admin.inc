@@ -45,7 +45,7 @@ function search_exclude_nid_search_exclusion_form() {
       $items[] = array(
         'data' => l($row->title . ' (nid:' . $row->nid . ')',
         'node/' . $row->nid),
-        'id' => 'node-' . $row->nid,
+        'id' => 'excluded-node-' . $row->nid,
       );
     }
 
@@ -68,6 +68,8 @@ function search_exclude_nid_search_exclusion_form() {
  * Form submission handler for search_exclude_nid_search_exclusion_form().
  */
 function search_exclude_nid_search_exclusion_form_submit($form, &$form_state) {
+  // This codes makes sure, that only actual node IDs are saved.
+  // The string entered into the textfield is also transformed into an array.
   if (isset($form_state['values']['search_exclude_nid_search_exclusion_nids'])) {
     $filtered_nid_list = array();
     $nid_list = $form_state['values']['search_exclude_nid_search_exclusion_nids'];
@@ -77,7 +79,7 @@ function search_exclude_nid_search_exclusion_form_submit($form, &$form_state) {
         // Add only add valid nodes.
         $node = node_load(intval(trim($nid)));
         if (isset($node->type)) {
-          $filtered_nid_list[] = intval($nid);
+          $filtered_nid_list[] = $node->nid;
         }
       }
     }
