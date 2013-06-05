@@ -111,6 +111,8 @@ function search_exclude_nid_get_excluded_nodes() {
       ->fields('n', array('nid', 'title'))
       ->condition('nid', variable_get('search_exclude_nid_search_exclusion_nids', array()), 'IN')
       ->execute();
-  } else
+  }
+  else {
     return array();
+  }
 }
