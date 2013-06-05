@@ -25,27 +25,23 @@ function search_exclude_nid_search_exclusion_form() {
     '#title' => t('Node title lookup'),
     '#type' => 'textfield',
     '#autocomplete_path' => 'search_exclusion/autocomplete',
-    '#description' => t('Lookup a node title and copy & paste the node ID into the list field above or press just "Save configuration". The node ID will then be automatically added to the list.'),
+    '#description' => t('Lookup a node title and copy & paste the node ID into the list field above or just press "Save configuration". The node ID will then be automatically added to the list.'),
   );
 
   $form['#attached']['js'] = array(
     drupal_get_path('module', 'search_exclude_nid') . '/search_exclude_nid.js',
   );
-
-  if (count(variable_get('search_exclude_nid_search_exclusion_nids', array()))) {
-    $items = array();
-    $result = db_select('node', 'n')
-      ->fields('n', array('nid', 'title'))
-      ->condition('nid', variable_get('search_exclude_nid_search_exclusion_nids', array()), 'IN')
-      ->execute();
+  
+  $excluded_nodes = search_exclude_nid_get_excluded_nodes();
+  if (count($excluded_nodes)) {
 
     // List of excluded nodes.
     $items = array();
-    foreach ($result as $row) {
+    foreach ($excluded_nodes as $excluded_node) {
       $items[] = array(
-        'data' => l($row->title . ' (nid:' . $row->nid . ')',
-        'node/' . $row->nid),
-        'id' => 'excluded-node-' . $row->nid,
+        'data' => l($excluded_node->title . ' (nid:' . $excluded_node->nid . ')',
+        'node/' . $excluded_node->nid),
+        'id' => 'excluded-node-' . $excluded_node->nid,
       );
     }
 
@@ -53,7 +49,7 @@ function search_exclude_nid_search_exclusion_form() {
       '#type' => 'markup',
       '#markup' => theme('item_list', array(
         'items' => $items,
-        'title' => 'List of excluded nodes',
+        'title' => t('List of excluded nodes'),
         'type' => 'ul',
         'attributes' => array(),
         )
@@ -104,4 +100,16 @@ function search_exclude_nid_nodes_autocomplete($string) {
 
   // Return the result to the form in json.
   drupal_json_output($matches);
+}
+
+/**
+ * Returns all excluded node ids + title.
+ */
+function search_exclude_nid_get_excluded_nodes() {
+  if (count(variable_get('search_exclude_nid_search_exclusion_nids', array()))) {
+    return db_select('node', 'n')
+      ->fields('n', array('nid', 'title'))
+      ->condition('nid', variable_get('search_exclude_nid_search_exclusion_nids', array()), 'IN')
+      ->execute();
+  } else return array();
 }
