@@ -31,7 +31,7 @@ function search_exclude_nid_search_exclusion_form() {
   $form['#attached']['js'] = array(
     drupal_get_path('module', 'search_exclude_nid') . '/search_exclude_nid.js',
   );
-  
+
   $excluded_nodes = search_exclude_nid_get_excluded_nodes();
   if (count($excluded_nodes)) {
 
@@ -111,5 +111,6 @@ function search_exclude_nid_get_excluded_nodes() {
       ->fields('n', array('nid', 'title'))
       ->condition('nid', variable_get('search_exclude_nid_search_exclusion_nids', array()), 'IN')
       ->execute();
-  } else return array();
+  } else
+    return array();
 }
