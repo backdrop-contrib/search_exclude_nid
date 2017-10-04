@@ -88,10 +88,18 @@ function search_exclude_nid_search_exclusion_form_submit($form, &$form_state) {
  */
 function search_exclude_nid_nodes_autocomplete($string) {
   $matches = array();
-  $result = db_select('node', 'n')
+  $query = db_select('node', 'n')
     ->fields('n', array('nid', 'title'))
-    ->condition('title', '%' . db_like($string) . '%', 'LIKE')
-    ->execute();
+    ->condition('title', '%' . db_like($string) . '%', 'LIKE');
+
+  // Remove already excluded nodes from the lookup.
+  $excluded_nids = variable_get('search_exclude_nid_search_exclusion_nids', array());
+
+  if (!empty($excluded_nids)) {
+    $query->condition('n.nid', $excluded_nids, 'NOT IN');
+  }
+
+  $result = $query->execute();
 
   // Save the query to matches.
   foreach ($result as $row) {
