@@ -18,6 +18,7 @@ function search_exclude_nid_search_exclusion_form() {
   $form['search_exclude_nid_search_exclusion_nids'] = array(
     '#title' => t('Node ids to be excluded from search result'),
     '#type' => 'textfield',
+    '#maxlength' => '1024',
     '#default_value' => implode(',', variable_get('search_exclude_nid_search_exclusion_nids', array())),
     '#description' => t('Please enter the node ids separated by a "," (for example: 1,23,45)'),
   );
