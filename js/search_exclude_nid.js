@@ -1,5 +1,5 @@
 (function ($) {
-  Drupal.behaviors.search_exclude_nid = {
+  Backdrop.behaviors.search_exclude_nid = {
     attach: function (context, settings) {
       // Handler for .ready() called.
       var filtered_nids_list = Array();

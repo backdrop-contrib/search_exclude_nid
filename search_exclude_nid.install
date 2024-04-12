@@ -1,14 +1,22 @@
 <?php
-
 /**
  * @file
  * Install, update and uninstall functions for the search_exclude_nid module.
  */
 
 /**
- * Implements hook_uninstall().
+ * Implements hook_update_N().
+ *
+ * Move search_exclude_nid settings from variable to config.
  */
-function search_exclude_nid_uninstall() {
-  variable_del('search_exclude_nid_search_exclusion_auto');
-  variable_del('search_exclude_nid_search_exclusion_nids');
+function search_exclude_nid_update_1100() {
+  // Migrate variables to config.
+  $config = config('search_exclude_nid.settings');
+  $config->set('search_exclusion_nids', update_variable_get('search_exclude_nid_search_exclusion_nids', array()));
+  $config->set('search_exclusion_auto', update_variable_get('search_exclude_nid_search_exclusion_auto', ''));
+  $config->save();
+
+  // Delete all variables.
+  update_variable_del('search_exclude_nid_search_exclusion_auto');
+  update_variable_del('search_exclude_nid_search_exclusion_nids');
 }

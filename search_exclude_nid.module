@@ -1,9 +1,19 @@
 <?php
-
 /**
  * @file
  * Excludes single node pages from search results
  */
+
+/**
+ * Implements hook_config_info().
+ */
+function search_exclude_nid_config_info() {
+  $prefixes['search_exclude_nid.settings'] = array(
+    'label' => t('Search Exclude by Node ID settings'),
+    'group' => t('Configuration'),
+  );
+  return $prefixes;
+}
 
 /**
  * Implements hook_menu().
@@ -15,7 +25,7 @@ function search_exclude_nid_menu() {
     'file' => 'search_exclude_nid.admin.inc',
     'title' => 'Hide nodes from search',
     'description' => 'Excludes nodes from the site search based on their node ID. Handy if you have duplicated content somewhere on listing pages for instance.',
-    'page callback' => 'drupal_get_form',
+    'page callback' => 'backdrop_get_form',
     'page arguments' => array('search_exclude_nid_search_exclusion_form'),
     'access callback' => 'user_access',
     'access arguments' => array('administer search exclude nids'),
@@ -53,7 +63,7 @@ function search_exclude_nid_query_alter(QueryAlterableInterface $query) {
     foreach ($tables as $table) {
       if ($table['table'] == 'search_index') {
         // Filter the excluded nids to make sure we dont break the query.
-        $excluded_nids = variable_get('search_exclude_nid_search_exclusion_nids', array());
+        $excluded_nids = config_get('search_exclude_nid.settings', 'search_exclusion_nids');
         if (count($excluded_nids)) {
           // Remove the node IDs from the query.
           $query->condition('n.nid', $excluded_nids, 'NOT IN');

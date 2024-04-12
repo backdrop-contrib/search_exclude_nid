@@ -1,6 +1,7 @@
-name = Search exclusion by node id
-description = Sometimes it's necessary to be able to exclude single nodes (like item listing pages) from the search. This module provides a simple way of doing it.
-core = 7.x
+name = Search Exclude NID
+description = Exclude individual nodes from search results
+backdrop = 1.x
+type = module
 package = Search
 
 dependencies[] = search

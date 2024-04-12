@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Administrative page callbacks for the redirect module.
@@ -19,7 +18,7 @@ function search_exclude_nid_search_exclusion_form() {
     '#title' => t('Node ids to be excluded from search result'),
     '#type' => 'textfield',
     '#maxlength' => '1024',
-    '#default_value' => implode(',', variable_get('search_exclude_nid_search_exclusion_nids', array())),
+    '#default_value' => implode(',', config_get('search_exclude_nid.settings', 'search_exclusion_nids')),
     '#description' => t('Please enter the node ids separated by a "," (for example: 1,23,45)'),
   );
   $form['search_exclude_nid_search_exclusion_auto'] = array(
@@ -30,7 +29,7 @@ function search_exclude_nid_search_exclusion_form() {
   );
 
   $form['#attached']['js'] = array(
-    drupal_get_path('module', 'search_exclude_nid') . '/search_exclude_nid.js',
+    backdrop_get_path('module', 'search_exclude_nid') . '/js/search_exclude_nid.js',
   );
 
   $excluded_nodes = search_exclude_nid_get_excluded_nodes();
@@ -53,8 +52,7 @@ function search_exclude_nid_search_exclusion_form() {
         'title' => t('List of excluded nodes'),
         'type' => 'ul',
         'attributes' => array(),
-        )
-      ),
+      )),
     );
   }
   $form['#submit'][] = 'search_exclude_nid_search_exclusion_form_submit';
@@ -94,7 +92,7 @@ function search_exclude_nid_nodes_autocomplete($string) {
     ->condition('title', '%' . db_like($string) . '%', 'LIKE');
 
   // Remove already excluded nodes from the lookup.
-  $excluded_nids = variable_get('search_exclude_nid_search_exclusion_nids', array());
+  $excluded_nids = config_get('search_exclude_nid.settings', 'search_exclusion_nids');
 
   if (!empty($excluded_nids)) {
     $query->condition('n.nid', $excluded_nids, 'NOT IN');
@@ -108,18 +106,19 @@ function search_exclude_nid_nodes_autocomplete($string) {
   }
 
   // Return the result to the form in json.
-  drupal_json_output($matches);
+  backdrop_json_output($matches);
 }
 
 /**
  * Returns all excluded node ids + title.
  */
 function search_exclude_nid_get_excluded_nodes() {
-  if (count(variable_get('search_exclude_nid_search_exclusion_nids', array()))) {
-    return db_select('node', 'n')
+  $search_exclusion_nids = config_get('search_exclude_nid.settings', 'search_exclusion_nids');
+  if (count($search_exclusion_nids)) {
+    $result = db_select('node', 'n')
       ->fields('n', array('nid', 'title'))
-      ->condition('nid', variable_get('search_exclude_nid_search_exclusion_nids', array()), 'IN')
-      ->execute();
+      ->condition('nid', $search_exclusion_nids, 'IN')
+      ->execute()->fetchAll();
   }
   else {
     return array();
