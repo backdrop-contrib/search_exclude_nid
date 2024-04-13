@@ -13,15 +13,15 @@
  */
 function search_exclude_nid_search_exclusion_form() {
   $form = array();
-
-  $form['search_exclude_nid_search_exclusion_nids'] = array(
+  $form['#config'] = 'search_exclude_nid.settings';
+  $form['search_exclusion_nids'] = array(
     '#title' => t('Node ids to be excluded from search result'),
     '#type' => 'textfield',
     '#maxlength' => '1024',
     '#default_value' => implode(',', config_get('search_exclude_nid.settings', 'search_exclusion_nids')),
     '#description' => t('Please enter the node ids separated by a "," (for example: 1,23,45)'),
   );
-  $form['search_exclude_nid_search_exclusion_auto'] = array(
+  $form['search_exclusion_auto'] = array(
     '#title' => t('Node title lookup'),
     '#type' => 'textfield',
     '#autocomplete_path' => 'search_exclusion/autocomplete',
@@ -65,9 +65,9 @@ function search_exclude_nid_search_exclusion_form() {
 function search_exclude_nid_search_exclusion_form_submit($form, &$form_state) {
   // This codes makes sure, that only actual node IDs are saved.
   // The string entered into the textfield is also transformed into an array.
-  if (isset($form_state['values']['search_exclude_nid_search_exclusion_nids'])) {
+  if (isset($form_state['values']['search_exclusion_nids'])) {
     $filtered_nid_list = array();
-    $nid_list = $form_state['values']['search_exclude_nid_search_exclusion_nids'];
+    $nid_list = $form_state['values']['search_exclusion_nids'];
     if ($nid_list) {
       $nid_list = explode(',', $nid_list);
       foreach ($nid_list as $nid) {
@@ -78,7 +78,7 @@ function search_exclude_nid_search_exclusion_form_submit($form, &$form_state) {
         }
       }
     }
-    $form_state['values']['search_exclude_nid_search_exclusion_nids'] = $filtered_nid_list;
+    $form_state['values']['search_exclusion_nids'] = $filtered_nid_list;
   }
 }
 
@@ -119,6 +119,7 @@ function search_exclude_nid_get_excluded_nodes() {
       ->fields('n', array('nid', 'title'))
       ->condition('nid', $search_exclusion_nids, 'IN')
       ->execute()->fetchAll();
+    return $result;
   }
   else {
     return array();

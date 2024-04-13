@@ -4,17 +4,17 @@
       // Handler for .ready() called.
       var filtered_nids_list = Array();
       jQuery('#edit-submit').click(function() {
-        var nid = parseInt(jQuery('#edit-search-exclude-nid-search-exclusion-auto').val());
+        var nid = parseInt(jQuery('#edit-search-exclusion-auto').val());
         if (!(isNaN(nid)) && (nid != 0)) {
           filtered_nids_list = getFilteredNidList();
           if (filtered_nids_list.containsNot(nid)) {
             filtered_nids_list.push(nid);
           }
-          jQuery('#edit-search-exclude-nid-search-exclusion-nids').val(filtered_nids_list.join(','));
-          jQuery('#edit-search-exclude-nid-search-exclusion-auto').val('').focus();
+          jQuery('#edit-search-exclusion-nids').val(filtered_nids_list.join(','));
+          jQuery('#edit-search-exclusion-auto').val('').focus();
         }
         filtered_nids_list = getFilteredNidList();
-        jQuery('#edit-search-exclude-nid-search-exclusion-nids').val(filtered_nids_list.join(','));
+        jQuery('#edit-search-exclusion-nids').val(filtered_nids_list.join(','));
       });
     }
   };
@@ -31,7 +31,7 @@ Array.prototype.containsNot = function(obj) {
 }
 
 function getFilteredNidList() {
-  var nidsList = jQuery('#edit-search-exclude-nid-search-exclusion-nids').val().split(',');
+  var nidsList = jQuery('#edit-search-exclusion-nids').val().split(',');
   var filtered_nids_list = new Array();
   var intRegex = /^\d+$/;
   for (var i in nidsList) {
